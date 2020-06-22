@@ -224,3 +224,6 @@ class PC(models.Model):
     def carryItem(self, item):
         if self.maxWeight < item.getWeight()+self.maxWeight:
             return self.inventory.carryItem()
+
+    def getStrength(self):
+        return self.abilities.strength
