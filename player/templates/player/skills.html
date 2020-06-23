@@ -1,0 +1,9 @@
+{% if skills %}
+    <ul>
+    {% for skill in skills %}
+        <li><a href="skills/{{ skill.name }}/">{{ skill.name }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No skills are available.</p>
+{% endif %}

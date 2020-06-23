@@ -2,34 +2,50 @@ from django.db import models
 
 
 class Abilities(models.Model):
-    strength = models.IntegerField
-    dexterity = models.IntegerField
-    constitution = models.IntegerField
-    wisdom = models.IntegerField
-    intelligence = models.IntegerField
-    charisma = models.IntegerField
+    name = models.CharField(max_length=100, primary_key=True)
+    strength = models.IntegerField()
+    dexterity = models.IntegerField()
+    constitution = models.IntegerField()
+    wisdom = models.IntegerField()
+    intelligence = models.IntegerField()
+    charisma = models.IntegerField()
 
 
 class Skill(models.Model):
     name = models.CharField(max_length=100, primary_key=True)
-    untrained = models.BooleanField
+    subclass = models.CharField(max_length=100, default="", blank=True)
+    acPenalty = models.BooleanField(default=False)
+    untrained = models.BooleanField()
     ability = models.CharField(max_length=3)
-    description = models.TextField
+    description = models.TextField()
+    url = models.URLField()
+
+    def fillData(self, name, untrained, ability, description):
+        self.name = name
+        self.untrained = untrained
+        self.ability = ability
+        self.description = description
 
 
 class SkillRank(models.Model):
     skill = models.ForeignKey(Skill, on_delete=models.CASCADE)
-    ranks = models.IntegerField
+    ranks = models.IntegerField()
 
 
 class Effect(models.Model):
     name = models.CharField(max_length=100, primary_key=True)
     description = models.TextField(blank=True)
     abilities = models.ForeignKey(Abilities, on_delete=models.SET_NULL, null=True)
-    skills = models.ManyToManyField(SkillRank)
-    
+    attackBonus = models.IntegerField(default=0)
+    extraDamage = models.IntegerField(default=0)
+    damage = models.CharField(max_length=10)
 
-#TODO: Need to finish ActiveEffect :)
+
+class EffectSkillRank(SkillRank):
+    effect = models.ForeignKey(Effect, on_delete=models.CASCADE)
+
+
+# TODO: Need to finish ActiveEffect :)
 class ActiveEffect(models.Model):
     effect = models.ForeignKey(Effect, on_delete=models.CASCADE)
 
@@ -57,13 +73,15 @@ class CommonInfo(models.Model):
 class Item(CommonInfo):
     specialProperties = models.TextField(blank=True)
     specialName = models.CharField(max_length=100, blank=True)
-    size = models.CharField(max_length=1, choices=super().SIZES, default='M')
-    weight = models.IntegerField
-    location = models.CharField(max_length=200, blank=True)
+    size = models.CharField(max_length=1, choices=CommonInfo.SIZES, default='M')
+    weight = models.IntegerField()
+    masterwork = models.BooleanField()
+    effects = models.ForeignKey(Effect, on_delete=models.SET_NULL, null=True)
+    material = models.CharField(max_length=100, default="Normal")
 
     def canBeWorn(self):
         return False
-    
+
     def getWeight(self, quantity=1):
         return self.weight
 
@@ -73,7 +91,7 @@ class Item(CommonInfo):
 
 # TODO: Finsih Spell Class
 class Spell(CommonInfo):
-    effect = models.TextField
+    effect = models.TextField()
 
 
 class WearableItem(Item):
@@ -96,9 +114,9 @@ class WieldableItem(Item):
 
 class Ammo(Item):
     damage = models.CharField(max_length=10)
-    extraDamage = models.IntegerField
-    ammountPerWeight = models.IntegerField
-    
+    extraDamage = models.IntegerField()
+    ammountPerWeight = models.IntegerField()
+
     def getWeight(self, quantity=1):
         weight = quantity / self.ammountPerWeight * self.weight
         if quantity % self.ammountPerWeight > self.ammountPerWeight / 2:
@@ -108,37 +126,36 @@ class Ammo(Item):
 
 class AmmoBundle(WieldableItem):
     ammo = models.ManyToManyField(Ammo)
-    quantity = models.IntegerField
+    quantity = models.IntegerField()
 
 
 class Weapon(WieldableItem):
-    blunt = models.BooleanField
-    pierce = models.BooleanField
-    slash = models.BooleanField
+    blunt = models.BooleanField(default=False)
+    pierce = models.BooleanField(default=False)
+    slash = models.BooleanField(default=False)
     damage = models.CharField(max_length=9)
-    criticalRange = models.IntegerField
-    critical = models.IntegerField
-    ammo = models.ForeignKey(Ammo)
-    ranged = models.BooleanField
-    range = models.IntegerField
-    hands = models.IntegerField
+    criticalRange = models.IntegerField()
+    critical = models.IntegerField()
+    defualtAmmo = models.ForeignKey(Ammo, on_delete=models.SET_NULL, null=True)
+    ranged = models.BooleanField()
+    range = models.IntegerField()
+    hands = models.IntegerField()
 
 
 # TODO: finish Armor Class
 class Armor(WearableItem):
-    ac = models.IntegerField
-    arcaneFailure = models.IntegerField
-    maxDex = models.IntegerField
-    ACPenalty = models.IntegerField
+    ac = models.IntegerField()
+    arcaneFailure = models.IntegerField()
+    maxDex = models.IntegerField()
+    ACPenalty = models.IntegerField()
 
 
 # TODO: Finish Shield Class
 class Shield(Armor):
     WIELDING = {
-        ("1H", "One Handed"),
-        ("2H", "Two Handed")
+        ("1H", "One Handed")
     }
-    hands = models.CharField(max_length=2, choices=WIELDING, )
+    hands = models.CharField(max_length=2, choices=WIELDING)
 
     def canBeWielded(self):
         return True
@@ -147,23 +164,33 @@ class Shield(Armor):
 # TODO: Finish Magical Item
 class MagicalItem(Item):
     spell = models.ForeignKey(Spell, on_delete=models.CASCADE)
-    weight = models.IntegerField
+
+
+class Location(models.Model):
+    name = models.CharField(max_length=100)
+
+
+class Inventory(models.Model):
+    location = models.ForeignKey(Location, on_delete=models.CASCADE)
 
 
 class InventoryItem(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
-    knowsSpecialProperties = models.BooleanField
-    knowsSpecialName = models.BooleanField
+    inventory = models.ForeignKey(Inventory, on_delete=models.CASCADE)
+    knowsSpecialProperties = models.BooleanField()
+    knowsSpecialName = models.BooleanField()
 
     def getWeight(self, quantity=1):
-        self.item.getWeight()
+        return self.item.getWeight() * quantity
 
 
 class Equipment(models.Model):
-    armor = models.ForeignKey(InventoryItem, on_delete=models.CASCADE)
-    leftHand = models.ForeignKey(InventoryItem, on_delete=models.CASCADE)
-    rightHand = models.ForeignKey(InventoryItem, on_delete=models.CASCADE)
-    carriedEquipment = models.ManyToManyField(InventoryItem, on_delete=models.CASCADE)
+    armor = models.ForeignKey(InventoryItem, on_delete=models.CASCADE, blank=True, null=True, related_name='armors')
+    leftHand = models.ForeignKey(InventoryItem, on_delete=models.CASCADE, blank=True, null=True,
+                                 related_name='leftHanded')
+    rightHand = models.ForeignKey(InventoryItem, on_delete=models.CASCADE, blank=True, null=True,
+                                  related_name='righthanded')
+    carriedEquipment = models.ManyToManyField(InventoryItem, blank=True)
     primaryHand = models.CharField(max_length=1, default="R")
 
     def equipItem(self, item, area):
@@ -193,37 +220,120 @@ class Equipment(models.Model):
         pass
 
 
-class Inventory(models.Model):
-    items = models.ManyToManyField(InventoryItem)
-    equipment = models.OneToOneField(Equipment)
+class SpecialAbilities(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField()
 
-    def equipItem(self, item, area):
-        return self.equipment.equipItem(item, area)
 
-    def carryItem(self, item):
-        return self.equipment.carryItem(item)
-        
+class Alignment(models.Model):
+    ALIGNMENTS ={
+        ("CE", "Chaotic Evil"),
+        ("NE", "Neutral Evil"),
+        ("LE", "Lawful Evil"),
+        ("CN", "Chaotic Neutral"),
+        ("NN", "True Neutral"),
+        ("LN", "Lawful Neutral"),
+        ("CG", "Chaotic Good"),
+        ("NG", "Neutral Good"),
+        ("LG", "Lawful Good")
+
+    }
+    name = models.CharField(max_length=100)
+    alignment = models.CharField(max_length=2, choices=ALIGNMENTS)
+
+
+class Class(CommonInfo):
+    shortHand = models.CharField(max_length=3)
+    hitDie = models.CharField(max_length=6)
+    alignment = models.ManyToManyField(Alignment)
+    classSkills = models.ManyToManyField(Skill, blank=True)
+    ranks = models.IntegerField()
+
+
+class ClassLevel(models.Model):
+    gameClass = models.ForeignKey(Class, on_delete=models.CASCADE)
+    level = models.IntegerField()
+    bab1 = models.IntegerField()
+    bab2 = models.IntegerField()
+    bab3 = models.IntegerField()
+    bab4 = models.IntegerField()
+    fort = models.IntegerField()
+    ref = models.IntegerField()
+    will = models.IntegerField()
+    specialAbilities = models.ManyToManyField(SpecialAbilities, blank=True, null=True)
+
+    def getLevel(self):
+        return self.gameClass.shortHand + "/" + self.level.__str__()
+
+
+class Race(CommonInfo):
+    abilities = models.ForeignKey(Abilities, on_delete=models.CASCADE)
+    size = models.CharField(max_length=1, choices=CommonInfo.SIZES)
+    raceSpecialAbilities = models.ManyToManyField(SpecialAbilities, blank=True)
+    speed = models.IntegerField(default=30)
+
+
+class SelectedRace(models.Model):
+    race = models.ForeignKey(Race, on_delete=models.CASCADE)
+    appliedAbilities = models.ForeignKey(Abilities, on_delete=models.CASCADE)
+
 
 class PC(models.Model):
+    playerName = models.CharField(max_length=200)
     name = models.CharField(max_length=200, primary_key=True)
-    inventory = models.OneToOneField(Inventory)
-    abilities = models.OneToOneField(Abilities)
-    skillRanks = models.ManyToManyField(SkillRank)
-    photo = models.ImageField
-    activeEffects = models.ManyToManyField(ActiveEffect)
-    maxWeight = models.IntegerField
+    race = models.OneToOneField(SelectedRace, on_delete=models.CASCADE, blank=True, null=True)
+    equipment = models.OneToOneField(Equipment, on_delete=models.CASCADE, blank=True)
+    inventory = models.ForeignKey(Inventory, on_delete=models.CASCADE, blank=True)
+    abilities = models.OneToOneField(Abilities, on_delete=models.CASCADE)
+    photo = models.ImageField(blank=True, null=True)
+    activeEffects = models.ManyToManyField(ActiveEffect, blank=True)
+    alignment = models.ForeignKey(Alignment, on_delete=models.SET_NULL, null=True)
+    gender = models.CharField(max_length=50, default="Male")
+    classLevels = models.ManyToManyField(ClassLevel, blank=True)
+
+    def maxWeight(self):
+        return 0
 
     def equipItem(self, item, area):
-        if self.maxWeight < item.getWeight()+self.maxWeight:
+        if self.maxWeight < item.getWeight() + self.maxWeight:
             return "Item is to heavy to be equipped"
         elif item.canBeWielded() or item.canBeWorn():
-            return self.inventory.equipItem(item, area)
+            return self.equipment.equipItem(item, area)
         else:
             return "Item cannot be equipped"
 
     def carryItem(self, item):
-        if self.maxWeight < item.getWeight()+self.maxWeight:
-            return self.inventory.carryItem()
+        if self.maxWeight < item.getWeight() + self.maxWeight:
+            return "Item is to heavy to carry"
+        else:
+            return self.equipment.carryItem(item)
 
     def getStrength(self):
         return self.abilities.strength
+
+    def getAlignment(self):
+        return self.alignment.alignment
+
+    def getLevels(self):
+        classLevels = self.classLevels
+        first = True
+        level= ""
+        for classLevel in classLevels.all():
+            level = level + classLevel.getLevel()
+            if not first:
+                level = level + "-"
+            first = False
+        return level
+
+    def getSize(self):
+        return self.race.race.size
+
+    def getRaceName(self):
+        return self.race.race.name
+
+    def getSpeed(self):
+        return self.race.race.speed
+
+
+class PCSkillRank(SkillRank):
+    pc = models.ForeignKey(PC, on_delete=models.CASCADE)

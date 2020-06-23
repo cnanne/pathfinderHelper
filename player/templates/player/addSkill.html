@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add a Skill</title>
+</head>
+<body>
+<form action="{% url 'addSkill' %}" method="post">
+    {% csrf_token %}
+    name:<input type="text" name="name" id="name"><br>
+    untrained?:<input type="radio" name="untrained", value="True", id="True">
+    <label for="True">True</label>
+    <input type="radio" name="untrained", value="False", id="False">
+    <label for="False">False</label><br>
+    Ability:<br>
+    {% for ability in abilities %}
+    <input type="radio" name="ability" value="{{ability}}" id="{{ability}}">
+    <label for="{{ability}}">{{ability}}</label><br>
+    {% endfor %}
+    <input type="text" name="description" id="description"><br>
+    <input type="submit", value="Add Skill">
+
+</form>
+</body>
+</html>

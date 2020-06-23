@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'player/style.css' %}">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ pc.name }}</title>
+
+
+
+
+
+</head>
+<body>
+ Nombre:  {{ pc.name }}<BR>
+    Genero/Raza:   {{ pc.gender }}/{{ pc.getRaceName }}<BR>
+    Alginment: {{ pc.getAlignment }}
+    Levels: {{ pc.getLevels }}
+    Size: {{ pc.getSize }}
+    AC: {{ pc.getAC }}
+    speed: {{ pc.getSpeed }}
+</body>
+</html>
