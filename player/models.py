@@ -10,6 +10,14 @@ class Abilities(models.Model):
     intelligence = models.IntegerField()
     charisma = models.IntegerField()
 
+    def __add__(self, other):
+        self.strength += other.strength
+        self.dexterity += other.dexterity
+        self.constitution += other.consitution
+        self.wisdom += other.wisdom
+        self.intelligence += other.intelligence
+        self.charisma += other.charisma
+
 
 class Skill(models.Model):
     name = models.CharField(max_length=100, primary_key=True)
@@ -226,7 +234,7 @@ class SpecialAbilities(models.Model):
 
 
 class Alignment(models.Model):
-    ALIGNMENTS ={
+    ALIGNMENTS = {
         ("CE", "Chaotic Evil"),
         ("NE", "Neutral Evil"),
         ("LE", "Lawful Evil"),
@@ -317,13 +325,32 @@ class PC(models.Model):
     def getLevels(self):
         classLevels = self.classLevels
         first = True
-        level= ""
+        level = ""
         for classLevel in classLevels.all():
             level = level + classLevel.getLevel()
             if not first:
                 level = level + "-"
             first = False
         return level
+
+    def getBab(self):
+        classLevels = self.classLevels
+        bab = [0, 0, 0, 0]
+        for classLevel in classLevels.all():
+            bab[0] += classLevel.bab1
+            bab[1] += classLevel.bab2
+            bab[2] += classLevel.bab3
+            bab[3] += classLevel.bab4
+        activeEffectsAttack = 0
+        activeEffectsAttack += self.activeEffectsAttackBonus()
+        bab[0] += activeEffectsAttack
+        if bab[1] > 0:
+            bab[1] += activeEffectsAttack
+        if bab[2] > 0:
+            bab[2] += activeEffectsAttack
+        if bab[3] > 0:
+            bab[3] += activeEffectsAttack
+        return bab
 
     def getSize(self):
         return self.race.race.size
@@ -333,6 +360,68 @@ class PC(models.Model):
 
     def getSpeed(self):
         return self.race.race.speed
+
+    def activeEffectsAttackBonus(self):
+        activeEffects = self.activeEffects
+        attack = 0
+        for activeEffect in activeEffects.all():
+            attack += activeEffect.attackBonus
+        return attack
+
+    def getSkills(self):
+        skills = {}
+        skillRanks = self.pcskillrank_set.all()
+        abilities = self.getAbilitiesSocresAndModifiers()
+        classSkills = self.getClassSkills()
+        for skill in skillRanks:
+            name = skill.skill.name
+            ranks = skill.ranks
+            ranks += abilities[skill.skill.ability]
+            if skill.skill.name in classSkills:
+                ranks += 3
+            skills[name] = ranks
+        for effect in self.activeEffects.all():
+            for skillRank in effect.effectskillrank_set.all():
+                if skillRank.skill.name not in skills:
+                    skills[skillRank.skill.name] = skillRank.ranks
+                else:
+                    skills[skillRank.skill.name] += skillRank.ranks
+
+    def getAbilitiesSocresAndModifiers(self):
+        abilities = self.getAbilities()
+        return {"STR": self.makeAbilitydictionary(abilities.strength),
+                     "DEX": self.makeAbilitydictionary(abilities.dexterity),
+                     "CON": self.makeAbilitydictionary(abilities.constitution),
+                     "WIS": self.makeAbilitydictionary(abilities.wisdom),
+                     "INT": self.makeAbilitydictionary(abilities.intelligence),
+                     "CHA": self.makeAbilitydictionary(abilities.charisma)}
+
+    def makeAbilitydictionary(self, abilityScore):
+        return {"score": abilityScore, "mod": self.calculateModifier(abilityScore)}
+
+    def getAbilities(self):
+        abilities = Abilities()
+        abilities += self.abilities
+        for effect in self.activeEffects.all():
+            abilities += effect.abilities
+        return abilities
+
+    def calculateModifier(self, ability):
+        mod = 0
+        if ability >= 10:
+            mod = int((ability - 10) / 2)
+        else:
+            mod = int((ability - 10) / 2) - 1
+
+    def getClassSkills(self):
+        classLevels = self.classLevels
+        classSkills = []
+        for classLevel in classLevels.all():
+            skills = classLevel.gameClass.classSkills
+            for skill in skills.all():
+                if skill.name not in classSkills:
+                    classSkills.append(skill)
+        return classSkills
 
 
 class PCSkillRank(SkillRank):
