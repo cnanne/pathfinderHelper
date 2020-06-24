@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ pc.name }} Skills and Saves</title>
+</head>
+<body>
+    {% for name, value in skills.items %}
+        {{ value }} = {{ name }}
+    {% endfor %}
+    {% for name, value in saves.items %}
+        {{ name }} = {{ value }}
+    {% endfor %}
+    {% for name, value in abilities.items %}
+        {{ name }}  {{ value[ }}
+    {% endfor %}
+</body>
+</html>

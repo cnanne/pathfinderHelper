@@ -285,6 +285,24 @@ class SelectedRace(models.Model):
     race = models.ForeignKey(Race, on_delete=models.CASCADE)
     appliedAbilities = models.ForeignKey(Abilities, on_delete=models.CASCADE)
 
+class AbilitiesMap():
+    str = dex = con = wis = int = cha = 10
+    strMod = dexMod = conMod = wisMod = intMod = chaMod = 0
+
+    def __init__(self, abilitiesDict):
+        self.str = abilitiesDict["STR"]["score"]
+        self.strMod = abilitiesDict["STR"]["mod"]
+        self.dex = abilitiesDict["DEX"]["score"]
+        self.dexMod = abilitiesDict["DEX"]["mod"]
+        self.con = abilitiesDict["CON"]["score"]
+        self.conMod = abilitiesDict["CON"]["mod"]
+        self.wis = abilitiesDict["WIS"]["score"]
+        self.wisMod = abilitiesDict["WIS"]["mod"]
+        self.int = abilitiesDict["INT"]["score"]
+        self.intMod = abilitiesDict["INT"]["mod"]
+        self.cha = abilitiesDict["CHA"]["score"]
+        self.chaMod = abilitiesDict["CHA"]["mod"]
+
 
 class PC(models.Model):
     playerName = models.CharField(max_length=200)
@@ -352,6 +370,8 @@ class PC(models.Model):
             bab[3] += activeEffectsAttack
         return bab
 
+    
+
     def getSize(self):
         return self.race.race.size
 
@@ -399,6 +419,8 @@ class PC(models.Model):
     def makeAbilitydictionary(self, abilityScore):
         return {"score": abilityScore, "mod": self.calculateModifier(abilityScore)}
 
+
+
     def getAbilities(self):
         abilities = Abilities()
         abilities += self.abilities
@@ -422,6 +444,9 @@ class PC(models.Model):
                 if skill.name not in classSkills:
                     classSkills.append(skill)
         return classSkills
+
+    def getSaves(self):
+        pass
 
 
 class PCSkillRank(SkillRank):

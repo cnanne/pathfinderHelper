@@ -34,6 +34,13 @@ def addSkill(request):
         skill.save()
         return HttpResponseRedirect(reverse('skills'))
 
+def skillsAndSaves(request, pc_name):
+    pc = get_object_or_404(PC, name=pc_name)
+    return render(request, 'player/skillsAndSaves.html', {'pc' : pc,
+                                                          'skills' : pc.getSkills(),
+                                                          'saves' : pc.getSaves(),
+                                                          'Abilities' : pc.getAbilitiesSocresAndModifiers()})
+
 
 def pcDetails(request, pc_name):
     return render(request, 'player/playerDetails.html', {'pc': get_object_or_404(PC, name=pc_name)})
