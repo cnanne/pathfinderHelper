@@ -2,17 +2,24 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{{ pc.name }} Skills and Saves</title>
+    <title>{{ pc.name }}'s Skills and Saves</title>
 </head>
 <body>
-    {% for name, value in skills.items %}
-        {{ value }} = {{ name }}
+    Skills:<br>
+    {% for skill in skills %}
+        {{ skill.ranks }} = {{ skill.skill.name }}<br>
     {% endfor %}
-    {% for name, value in saves.items %}
-        {{ name }} = {{ value }}
-    {% endfor %}
-    {% for name, value in abilities.items %}
-        {{ name }}  {{ value[ }}
-    {% endfor %}
+    SAVES:
+    Reflex Save:      {{ saves.ref }}<br>
+    Fortitude Save:   {{ saves.fort }}<br>
+    Will Save:        {{ saves.will }}<br>
+    Ability         Score       Modifier<br>
+    Strength:       {{ abilities.str }}      {{ abilities.strMod }}<br>
+    Dexterity:       {{ abilities.dex }}      {{ abilities.dexMod }}<br>
+    Constitution:       {{ abilities.con }}      {{ abilities.conMod }}<br>
+    Wisdom:       {{ abilities.wis }}      {{ abilities.wisMod }}<br>
+    Intelligence:       {{ abilities.int }}      {{ abilities.intMod }}<br>
+    Charisma:       {{ abilities.cha }}      {{ abilities.chaMod }}<br>
+
 </body>
 </html>

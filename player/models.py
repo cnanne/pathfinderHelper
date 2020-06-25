@@ -3,20 +3,21 @@ from django.db import models
 
 class Abilities(models.Model):
     name = models.CharField(max_length=100, primary_key=True)
-    strength = models.IntegerField()
-    dexterity = models.IntegerField()
-    constitution = models.IntegerField()
-    wisdom = models.IntegerField()
-    intelligence = models.IntegerField()
-    charisma = models.IntegerField()
+    strength = models.IntegerField(default=0)
+    dexterity = models.IntegerField(default=0)
+    constitution = models.IntegerField(default=0)
+    wisdom = models.IntegerField(default=0)
+    intelligence = models.IntegerField(default=0)
+    charisma = models.IntegerField(default=0)
 
     def __add__(self, other):
         self.strength += other.strength
         self.dexterity += other.dexterity
-        self.constitution += other.consitution
+        self.constitution += other.constitution
         self.wisdom += other.wisdom
         self.intelligence += other.intelligence
         self.charisma += other.charisma
+        return self
 
 
 class Skill(models.Model):
@@ -39,6 +40,11 @@ class SkillRank(models.Model):
     skill = models.ForeignKey(Skill, on_delete=models.CASCADE)
     ranks = models.IntegerField()
 
+    @classmethod
+    def create(cls, skill, ranks):
+        skillRank = cls(skill=skill,ranks=ranks)
+        return skillRank
+
 
 class Effect(models.Model):
     name = models.CharField(max_length=100, primary_key=True)
@@ -47,6 +53,9 @@ class Effect(models.Model):
     attackBonus = models.IntegerField(default=0)
     extraDamage = models.IntegerField(default=0)
     damage = models.CharField(max_length=10)
+    fort = models.IntegerField(default=0)
+    will = models.IntegerField(default=0)
+    ref = models.IntegerField(default=0)
 
 
 class EffectSkillRank(SkillRank):
@@ -268,7 +277,7 @@ class ClassLevel(models.Model):
     fort = models.IntegerField()
     ref = models.IntegerField()
     will = models.IntegerField()
-    specialAbilities = models.ManyToManyField(SpecialAbilities, blank=True, null=True)
+    specialAbilities = models.ManyToManyField(SpecialAbilities, blank=True)
 
     def getLevel(self):
         return self.gameClass.shortHand + "/" + self.level.__str__()
@@ -279,11 +288,15 @@ class Race(CommonInfo):
     size = models.CharField(max_length=1, choices=CommonInfo.SIZES)
     raceSpecialAbilities = models.ManyToManyField(SpecialAbilities, blank=True)
     speed = models.IntegerField(default=30)
+    fort = models.IntegerField(default=0)
+    will = models.IntegerField(default=0)
+    ref = models.IntegerField(default=0)
 
 
 class SelectedRace(models.Model):
     race = models.ForeignKey(Race, on_delete=models.CASCADE)
     appliedAbilities = models.ForeignKey(Abilities, on_delete=models.CASCADE)
+
 
 class AbilitiesMap():
     str = dex = con = wis = int = cha = 10
@@ -302,6 +315,15 @@ class AbilitiesMap():
         self.intMod = abilitiesDict["INT"]["mod"]
         self.cha = abilitiesDict["CHA"]["score"]
         self.chaMod = abilitiesDict["CHA"]["mod"]
+
+
+class Saves():
+    fort = dex = will = 0
+
+    def __init__(self, saves):
+        self.fort = saves["fort"]
+        self.will = saves["will"]
+        self.ref = saves["ref"]
 
 
 class PC(models.Model):
@@ -390,22 +412,32 @@ class PC(models.Model):
 
     def getSkills(self):
         skills = {}
-        skillRanks = self.pcskillrank_set.all()
+        skillRanks = self.skillRanks.all()
         abilities = self.getAbilitiesSocresAndModifiers()
         classSkills = self.getClassSkills()
         for skill in skillRanks:
             name = skill.skill.name
             ranks = skill.ranks
-            ranks += abilities[skill.skill.ability]
-            if skill.skill.name in classSkills:
-                ranks += 3
-            skills[name] = ranks
+            ranks += abilities[skill.skill.ability]["mod"]
+            for classSkill in classSkills:
+                if skill.skill.name == classSkill.name:
+                    ranks += 3
+                    break
+            skills[name] = SkillRank.create(skill.skill,
+                                            ranks)
         for effect in self.activeEffects.all():
             for skillRank in effect.effectskillrank_set.all():
-                if skillRank.skill.name not in skills:
-                    skills[skillRank.skill.name] = skillRank.ranks
+                if skillRank.skill.name in skills.keys():
+                    skills[skillRank.skill.name].ranks += skillRank.ranks
                 else:
-                    skills[skillRank.skill.name] += skillRank.ranks
+                    skill = SkillRank.create()
+                    skill.skill = skillRank.skill
+                    skill.ranks = skillRank.ranks
+                    skills[skillRank.skill.name] = skill
+        return skills
+
+    def getAbilitiesMap(self):
+        return self.getAbilitiesSocresAndModifiers()
 
     def getAbilitiesSocresAndModifiers(self):
         abilities = self.getAbilities()
@@ -434,6 +466,7 @@ class PC(models.Model):
             mod = int((ability - 10) / 2)
         else:
             mod = int((ability - 10) / 2) - 1
+        return mod
 
     def getClassSkills(self):
         classLevels = self.classLevels
@@ -446,8 +479,25 @@ class PC(models.Model):
         return classSkills
 
     def getSaves(self):
-        pass
+        ref = 0
+        fort = 0
+        will = 0
+        classes = self.classLevels.all()
+        for classLevel in classes:
+            ref = ref + classLevel.ref
+            fort += classLevel.fort
+            will += classLevel.will
+        acitveEffects = self.activeEffects.all()
+        for activeEffect in acitveEffects:
+            ref = activeEffect.effect.ref
+            fort = activeEffect.effect.fort
+            will = activeEffect.effect.will
+        ref += self.race.race.ref
+        will += self.race.race.will
+        fort += self.race.race.fort
+        saves = Saves({"ref": ref, "will": will, "fort": fort})
+        return saves
 
 
 class PCSkillRank(SkillRank):
-    pc = models.ForeignKey(PC, on_delete=models.CASCADE)
+    pc = models.ForeignKey(PC, on_delete=models.CASCADE, related_name="skillRanks")
