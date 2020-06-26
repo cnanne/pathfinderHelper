@@ -1,4 +1,5 @@
 from django.db import models
+from player.classes.items import *
 
 
 class Location(models.Model):

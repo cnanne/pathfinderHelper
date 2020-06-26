@@ -1,5 +1,7 @@
 from django.db import models
 from player.classes.items import *
+from player.classes.alignment import *
+from player.classes.specialAbilities import *
 
 
 class Class(CommonInfo):

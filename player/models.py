@@ -7,23 +7,6 @@ from player.classes.inventoryAndEquipment import *
 from player.classes.raceAndClasses import *
 
 
-class Alignment(models.Model):
-    ALIGNMENTS = {
-        ("CE", "Chaotic Evil"),
-        ("NE", "Neutral Evil"),
-        ("LE", "Lawful Evil"),
-        ("CN", "Chaotic Neutral"),
-        ("NN", "True Neutral"),
-        ("LN", "Lawful Neutral"),
-        ("CG", "Chaotic Good"),
-        ("NG", "Neutral Good"),
-        ("LG", "Lawful Good")
-
-    }
-    name = models.CharField(max_length=100)
-    alignment = models.CharField(max_length=2, choices=ALIGNMENTS)
-
-
 class Saves:
     fort = dex = will = 0
 

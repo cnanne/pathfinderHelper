@@ -9,5 +9,6 @@ urlpatterns = [
     path('addSkill', views.addSkill, name='addSkill'),
     path('skills/<str:skill_name>/', views.skillDetail, name='skillDetail'),
     path('<str:pc_name>', views.pcDetails,name='pcDetail'),
-    path('<str:pc_name>/skillsAndSaves/', views.skillsAndSaves, name='skillsAndSaves'),
+    path('<str:pc_name>/skillsAndSaves', views.skillsAndSaves, name='skillsAndSaves'),
+    path('<str:pc_name>/inventory', views.inventory, name='inventory'),
 ]

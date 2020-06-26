@@ -1,5 +1,5 @@
 from django.db import models
-from player.classes.items import *
+from player.classes.commonInfo import CommonInfo
 
 
 # TODO: Finsih Spell Class

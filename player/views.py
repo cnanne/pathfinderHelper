@@ -51,3 +51,7 @@ def pcDetails(request, pc_name):
 def skillDetail(request, skill_name):
     return render(request, 'player/skillDetail.html', {'skill': get_object_or_404(Skill, name=skill_name),
                                                        'untrained': True})
+
+
+def inventory(reques, pc_name):
+    pass
