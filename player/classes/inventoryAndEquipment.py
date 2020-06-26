@@ -9,15 +9,23 @@ class Location(models.Model):
 class Inventory(models.Model):
     location = models.ForeignKey(Location, on_delete=models.CASCADE)
 
+    def __iadd__(self, other):
+        for item in other.items.all():
+            item.inventory = self
+        return self
+
 
 class InventoryItem(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
-    inventory = models.ForeignKey(Inventory, on_delete=models.CASCADE)
+    inventory = models.ForeignKey(Inventory, on_delete=models.CASCADE, related_name="items")
     knowsSpecialProperties = models.BooleanField()
     knowsSpecialName = models.BooleanField()
 
     def getWeight(self, quantity=1):
         return self.item.getWeight() * quantity
+
+    def getInventory(self):
+        pass
 
 
 class Equipment(models.Model):
@@ -26,7 +34,7 @@ class Equipment(models.Model):
                                  related_name='leftHanded')
     rightHand = models.ForeignKey(InventoryItem, on_delete=models.CASCADE, blank=True, null=True,
                                   related_name='righthanded')
-    carriedEquipment = models.ManyToManyField(InventoryItem, blank=True)
+    carriedEquipment = models.ManyToManyField(Inventory, blank=True)
     primaryHand = models.CharField(max_length=1, default="R")
 
     def equipItem(self, item, area):
@@ -50,7 +58,10 @@ class Equipment(models.Model):
         pass
 
     def equipBH(self, item):
-        pass
+        if self.primaryHand == "RH":
+            self.equipRH(item)
+        else:
+            self.equipLH(item)
 
     def carryItem(self, item):
         pass

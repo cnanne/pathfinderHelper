@@ -24,7 +24,16 @@ class Item(CommonInfo):
 
 
 class WearableItem(Item):
-    area = models.CharField(max_length=50)
+    AREAS = {
+        ("HEAD", "Head"),
+        ("EYE", "Eye"),
+        ("NECK", "Neck"),
+        ("TORSO", "Torso"),
+        ("LEGS", "Legs"),
+        ("FEET", "Feet")
+    }
+
+    area = models.CharField(max_length=50, choices=AREAS)
 
     def canBeWorn(self):
         return True
@@ -69,6 +78,7 @@ class Weapon(WieldableItem):
     ranged = models.BooleanField()
     range = models.IntegerField()
     hands = models.IntegerField()
+    needsAmo = models.BooleanField(default=False)
 
 
 # TODO: finish Armor Class
