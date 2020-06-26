@@ -14,6 +14,12 @@ class Inventory(models.Model):
             item.inventory = self
         return self
 
+    def getWeight(self):
+        weight = 0
+        for item in self.items.all():
+            weight += item.getWeight()
+        return weight
+
 
 class InventoryItem(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
@@ -24,20 +30,36 @@ class InventoryItem(models.Model):
     def getWeight(self, quantity=1):
         return self.item.getWeight() * quantity
 
-    def getInventory(self):
-        pass
+    def moveItem(self, inventory):
+        self.inventory = inventory
 
 
 class Equipment(models.Model):
-    armor = models.ForeignKey(InventoryItem, on_delete=models.CASCADE, blank=True, null=True, related_name='armors')
-    leftHand = models.ForeignKey(InventoryItem, on_delete=models.CASCADE, blank=True, null=True,
+    armor = models.ForeignKey(InventoryItem, on_delete=models.SET_NULL, blank=True, null=True, related_name='armors')
+    leftHand = models.ForeignKey(InventoryItem, on_delete=models.SET_NULL, blank=True, null=True,
                                  related_name='leftHanded')
-    rightHand = models.ForeignKey(InventoryItem, on_delete=models.CASCADE, blank=True, null=True,
+    rightHand = models.ForeignKey(InventoryItem, on_delete=models.SET_NULL, blank=True, null=True,
                                   related_name='righthanded')
     carriedEquipment = models.OneToOneField(Inventory, blank=True, on_delete=models.SET_NULL, null=True)
     primaryHand = models.CharField(max_length=1, default="R")
+    eyes = models.ForeignKey(InventoryItem, on_delete=models.SET_NULL, null=True, related_name="eyes")
+    legs = models.ForeignKey(InventoryItem, on_delete=models.SET_NULL, null=True, related_name="legs")
+    neck = models.ForeignKey(InventoryItem, on_delete=models.SET_NULL, null=True, related_name="neck")
+    feet = models.ForeignKey(InventoryItem, on_delete=models.SET_NULL, null=True, related_name="feet")
+
+    def weightOfOtherEquipment(self):
+        weight = 0
+        weight = self.eyes.getWeight() + self.legs.getWeight() + self.neck.getWeight()
+        return 0
+
+    def getWeight(self):
+        weight = self.carriedEquipment.getWeight()
+        weight += (self.armor.getWeight() + self.leftHand.getWeight() + self.weightOfOtherEquipment())
+        return weight
 
     def equipItem(self, item, area):
+        if not item.canBeEquipped():
+            return
         if area == "LH":
             self.equipLH(item)
         elif area == "RH":
@@ -52,10 +74,18 @@ class Equipment(models.Model):
         pass
 
     def equipRH(self, item):
-        pass
+        if self.rightHand is not None:
+            self.carryItem(self.rightHand)
+        self.rightHand(item)
 
     def equipArmor(self, item):
-        pass
+        if not item.canBeWorn():
+            return
+        wearable = WearableItem(item)
+        if wearable.area == "TORSO":
+            if self.armor is not None:
+                self.armor.inventory = self.carriedEquipment
+            self.armor = item
 
     def equipBH(self, item):
         if self.primaryHand == "RH":
@@ -64,4 +94,4 @@ class Equipment(models.Model):
             self.equipLH(item)
 
     def carryItem(self, item):
-        pass
+        InventoryItem(item).inventory = self.carriedEquipment

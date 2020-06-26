@@ -22,6 +22,9 @@ class Item(CommonInfo):
     def canBeWielded(self):
         return False
 
+    def canBeEquipped(self):
+        return False
+
 
 class WearableItem(Item):
     AREAS = {
@@ -38,6 +41,9 @@ class WearableItem(Item):
     def canBeWorn(self):
         return True
 
+    def canBeEquipped(self):
+        return True
+
 
 class WieldableItem(Item):
     WIELDING = {
@@ -47,6 +53,9 @@ class WieldableItem(Item):
     area = models.CharField(max_length=2, choices=WIELDING)
 
     def canBeWielded(self):
+        return True
+
+    def canBeEquipped(self):
         return True
 
 
@@ -116,3 +125,6 @@ class Shield(Armor):
 # TODO: Finish Magical Item
 class MagicalItem(Item):
     spell = models.ForeignKey(Spell, on_delete=models.CASCADE)
+
+
+

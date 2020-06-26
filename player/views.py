@@ -56,7 +56,7 @@ def skillDetail(request, skill_name):
 def inventory(request, pc_name):
     pc = get_object_or_404(PC, name=pc_name)
     equipment = pc.equipment
-    inventory = equipment.carriedEquipment.all()
+    inventory = equipment.carriedEquipment.items.all()
     return render(request, 'player/inventory.html', {'pc': pc,
                                                      'equipment': equipment,
                                                      'inventory': inventory})
