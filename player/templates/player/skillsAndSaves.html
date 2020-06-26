@@ -5,21 +5,47 @@
     <title>{{ pc.name }}'s Skills and Saves</title>
 </head>
 <body>
-    Skills:<br>
-    {% for skill in skills %}
-        {{ skill.ranks }} = {{ skill.skill.name }}<br>
+    <h2>Skills:</h2><br>
+    <table>
+    <tr>>
+    <th>Skill Name</th><th>Ranks</th>
+    </tr>
+        {% for skill in skills %}
+        <tr>
+            <td>{{ skill.skill.name }}</td>
+            <td>{{ skill.ranks }}</td>
+        </tr>
     {% endfor %}
-    SAVES:
-    Reflex Save:      {{ saves.ref }}<br>
-    Fortitude Save:   {{ saves.fort }}<br>
-    Will Save:        {{ saves.will }}<br>
-    Ability         Score       Modifier<br>
-    Strength:       {{ abilities.str }}      {{ abilities.strMod }}<br>
-    Dexterity:       {{ abilities.dex }}      {{ abilities.dexMod }}<br>
-    Constitution:       {{ abilities.con }}      {{ abilities.conMod }}<br>
-    Wisdom:       {{ abilities.wis }}      {{ abilities.wisMod }}<br>
-    Intelligence:       {{ abilities.int }}      {{ abilities.intMod }}<br>
-    Charisma:       {{ abilities.cha }}      {{ abilities.chaMod }}<br>
+    </table>
+    <h2>SAVES<br></h2>
+    <table>
+        <tr>
+            <th>Save</th><th>score</th>
+        </tr>
+        <tr>
+            <td>Reflex Save:</td><td>{{ saves.ref }}</td>
+        </tr>
+        <tr>
+            <td>Fortitude Save:</td>   <td>{{ saves.fort }}</td>
+        </tr>
+        <tr>
+            <td>Will Save:</td>        <td>{{ saves.will }}</td>
+        </tr>
+    </table>
+    <h2>Abilities</h2>
+    <table>
+        <tr>
+            <th>Ability</th><th>Score</th><th>Modifier</th>
+        </tr>
+        <tr>
+            <td>Strength</td><td>{{ abilities.str }}</td><td>{{ abilities.strMod }}</td>
+            <td>Dexterity</td><td>{{ abilities.dex }}</td><td>{{ abilities.dexMod }}</td>
+            <td>Constitution</td><td>{{ abilities.con }}</td><td>{{ abilities.conMod }}</td>
+            <td>Wisdom</td><td>{{ abilities.wis }}</td><td>{{ abilities.wisMod }}</td>
+            <td>Intelligence</td><td>{{ abilities.int }}</td><td>{{ abilities.intMod }}</td>
+            <td>Charisma</td><td>{{ abilities.cha }}</td><td>{{ abilities.chaMod }}</td>
+        </tr>
+    </table>
 
 </body>
 </html>

@@ -37,7 +37,7 @@ def addSkill(request):
 
 def skillsAndSaves(request, pc_name):
     pc = get_object_or_404(PC, name=pc_name)
-    abilities = AbilitiesMap(pc.getAbilitiesMap())
+    abilities = AbilitiesMap(pc.getAbilitiesMap)
     return render(request, 'player/skillsAndSaves.html', {'pc': pc,
                                                           'skills': pc.getSkills().values(),
                                                           'saves': pc.getSaves(),
