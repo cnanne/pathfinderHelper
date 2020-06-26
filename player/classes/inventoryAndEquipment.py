@@ -34,7 +34,7 @@ class Equipment(models.Model):
                                  related_name='leftHanded')
     rightHand = models.ForeignKey(InventoryItem, on_delete=models.CASCADE, blank=True, null=True,
                                   related_name='righthanded')
-    carriedEquipment = models.ManyToManyField(Inventory, blank=True)
+    carriedEquipment = models.OneToOneField(Inventory, blank=True, on_delete=models.SET_NULL, null=True)
     primaryHand = models.CharField(max_length=1, default="R")
 
     def equipItem(self, item, area):

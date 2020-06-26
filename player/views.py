@@ -53,5 +53,10 @@ def skillDetail(request, skill_name):
                                                        'untrained': True})
 
 
-def inventory(reques, pc_name):
-    pass
+def inventory(request, pc_name):
+    pc = get_object_or_404(PC, name=pc_name)
+    equipment = pc.equipment
+    inventory = equipment.carriedEquipment.all()
+    return render(request, 'player/inventory.html', {'pc': pc,
+                                                     'equipment': equipment,
+                                                     'inventory': inventory})

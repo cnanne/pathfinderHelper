@@ -10,7 +10,7 @@ class Item(CommonInfo):
     size = models.CharField(max_length=1, choices=CommonInfo.SIZES, default='M')
     weight = models.IntegerField()
     masterwork = models.BooleanField()
-    effects = models.ForeignKey(Effect, on_delete=models.SET_NULL, null=True)
+    effects = models.ForeignKey(Effect, on_delete=models.SET_NULL, null=True, blank=True)
     material = models.CharField(max_length=100, default="Normal")
 
     def canBeWorn(self):
@@ -50,10 +50,21 @@ class WieldableItem(Item):
         return True
 
 
+class AmmoType(models.Model):
+    TYPES = {("BOLTS", "Bolts"),
+             ("ARROWS", "Arrows"),
+             ("DARTS", "Darts"),
+             ("NONE", "None")}
+    type = models.CharField(max_length=15, primary_key=True)
+
+
 class Ammo(Item):
     damage = models.CharField(max_length=10)
     extraDamage = models.IntegerField()
     ammountPerWeight = models.IntegerField()
+    ammoType = models.ForeignKey(AmmoType, on_delete=models.CASCADE,
+                                 null=True,
+                                 blank=True)
 
     def getWeight(self, quantity=1):
         weight = quantity / self.ammountPerWeight * self.weight
@@ -74,11 +85,13 @@ class Weapon(WieldableItem):
     damage = models.CharField(max_length=9)
     criticalRange = models.IntegerField()
     critical = models.IntegerField()
-    defualtAmmo = models.ForeignKey(Ammo, on_delete=models.SET_NULL, null=True)
+    defaultAmmoType = models.ForeignKey(AmmoType,
+                                        on_delete=models.SET_NULL,
+                                        null=True)
     ranged = models.BooleanField()
     range = models.IntegerField()
     hands = models.IntegerField()
-    needsAmo = models.BooleanField(default=False)
+    needsAmmo = models.BooleanField(default=False)
 
 
 # TODO: finish Armor Class

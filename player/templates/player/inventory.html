@@ -12,9 +12,14 @@
         <tr>
             <td>
                 <table>
-                    <tr>
                         <th>Item Name</th><th>Quantity</th>
-                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <table>
+
                     {% for item in items %}
                         <tr><td>{{ item.name }}</td><td></td></tr>
                     {% endfor %}
@@ -24,9 +29,17 @@
                 <table>
                     <tr>
                         <td></td><td>Head</td><td>Eyes</td>
+                    </tr>
+                    <tr>
                         <td></td><td>Neck</td><td></td>
-                        <td></td><td>Armor</td><td></td>
-                        <td>LH</td><td>Legs</td><td>RH</td>
+                    </tr>
+                    <tr>
+                        <td>LH</td><td>Armor</td><td>RH</td>
+                    </tr>
+                    <tr>
+                        <td></td><td>Legs</td><td></td>
+                    </tr>
+                    <tr>
                         <td></td><td>Feet</td><td></td>
                     </tr>
                 </table>
