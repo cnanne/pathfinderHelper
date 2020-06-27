@@ -7,7 +7,7 @@ class Location(models.Model):
 
 
 class Inventory(models.Model):
-    location = models.ForeignKey(Location, on_delete=models.CASCADE)
+    location = models.OneToOneField(Location, on_delete=models.CASCADE)
 
     def __iadd__(self, other):
         for item in other.items.all():
@@ -34,13 +34,12 @@ class InventoryItem(models.Model):
         self.inventory = inventory
 
 
-class Equipment(models.Model):
+class Equipment(Inventory):
     armor = models.ForeignKey(InventoryItem, on_delete=models.SET_NULL, blank=True, null=True, related_name='armors')
     leftHand = models.ForeignKey(InventoryItem, on_delete=models.SET_NULL, blank=True, null=True,
                                  related_name='leftHanded')
     rightHand = models.ForeignKey(InventoryItem, on_delete=models.SET_NULL, blank=True, null=True,
                                   related_name='righthanded')
-    carriedEquipment = models.OneToOneField(Inventory, blank=True, on_delete=models.SET_NULL, null=True)
     primaryHand = models.CharField(max_length=1, default="R")
     eyes = models.ForeignKey(InventoryItem, on_delete=models.SET_NULL, null=True, related_name="eyes")
     legs = models.ForeignKey(InventoryItem, on_delete=models.SET_NULL, null=True, related_name="legs")
