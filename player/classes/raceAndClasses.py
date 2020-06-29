@@ -4,6 +4,10 @@ from player.classes.alignment import *
 from player.classes.specialAbilities import *
 
 
+class Language(models.Model):
+    name = models.CharField(max_length=100)
+
+
 class Class(CommonInfo):
     shortHand = models.CharField(max_length=3)
     hitDie = models.CharField(max_length=6)
@@ -36,6 +40,7 @@ class ClassLevel(models.Model):
 # TODO: Need to add Language
 class Race(CommonInfo):
     abilities = models.ForeignKey(Abilities, on_delete=models.CASCADE)
+    languages = models.ManyToManyField(Language, blank=True)
     size = models.CharField(max_length=1, choices=CommonInfo.SIZES)
     raceSpecialAbilities = models.ManyToManyField(SpecialAbilities, blank=True)
     speed = models.IntegerField(default=30)
