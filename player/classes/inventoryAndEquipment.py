@@ -5,6 +5,9 @@ from player.classes.items import *
 class Location(models.Model):
     name = models.CharField(max_length=100)
 
+    def __str__(self):
+        return self.name
+
 
 class Inventory(models.Model):
     location = models.OneToOneField(Location, on_delete=models.CASCADE)
@@ -20,6 +23,9 @@ class Inventory(models.Model):
             weight += item.getWeight()
         return weight
 
+    def __str__(self):
+        return "Inventory @ " + self.location.name
+
 
 class InventoryItem(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
@@ -33,6 +39,9 @@ class InventoryItem(models.Model):
     def moveItem(self, inventory):
         self.inventory = inventory
 
+    def __str__(self):
+        return self.item.__str__() + " @ " + self.inventory.location.__str__()
+
 
 class Equipment(Inventory):
     armor = models.ForeignKey(InventoryItem, on_delete=models.SET_NULL, blank=True, null=True, related_name='armors')
@@ -45,6 +54,9 @@ class Equipment(Inventory):
     legs = models.ForeignKey(InventoryItem, on_delete=models.SET_NULL, null=True, related_name="legs")
     neck = models.ForeignKey(InventoryItem, on_delete=models.SET_NULL, null=True, related_name="neck")
     feet = models.ForeignKey(InventoryItem, on_delete=models.SET_NULL, null=True, related_name="feet")
+
+    def __str__(self):
+        return self.pc.name + '\'s equipment'
 
     def weightOfOtherEquipment(self):
         weight = 0

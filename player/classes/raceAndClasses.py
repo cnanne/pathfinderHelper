@@ -11,6 +11,9 @@ class Class(CommonInfo):
     classSkills = models.ManyToManyField(Skill, blank=True)
     ranks = models.IntegerField()
 
+    def __str__(self):
+        return self.name
+
 
 class ClassLevel(models.Model):
     gameClass = models.ForeignKey(Class, on_delete=models.CASCADE)
@@ -24,10 +27,13 @@ class ClassLevel(models.Model):
     will = models.IntegerField()
     specialAbilities = models.ManyToManyField(SpecialAbilities, blank=True)
 
+    def __str__(self):
+        return self.gameClass.name + self.level
+
     def getLevel(self):
         return self.gameClass.shortHand + "/" + self.level.__str__()
 
-
+# TODO: Need to add Language
 class Race(CommonInfo):
     abilities = models.ForeignKey(Abilities, on_delete=models.CASCADE)
     size = models.CharField(max_length=1, choices=CommonInfo.SIZES)
@@ -36,6 +42,9 @@ class Race(CommonInfo):
     fort = models.IntegerField(default=0)
     will = models.IntegerField(default=0)
     ref = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.name
 
 
 class SelectedRace(models.Model):

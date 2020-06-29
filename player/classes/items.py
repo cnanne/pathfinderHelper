@@ -13,6 +13,12 @@ class Item(CommonInfo):
     effects = models.ForeignKey(Effect, on_delete=models.SET_NULL, null=True, blank=True)
     material = models.CharField(max_length=100, default="Normal")
 
+    def __str__(self):
+        if self.specialName is not None:
+            return self.specialName + "(" + self.name + ")"
+        else:
+            return self.name
+
     def canBeWorn(self):
         return False
 
@@ -65,6 +71,9 @@ class AmmoType(models.Model):
              ("DARTS", "Darts"),
              ("NONE", "None")}
     type = models.CharField(max_length=15, primary_key=True)
+
+    def __str__(self):
+        return self.type
 
 
 class Ammo(Item):

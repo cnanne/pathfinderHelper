@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'gm.apps.GmConfig',
     'player.apps.PlayerConfig',
     'django.contrib.admin',
     'django.contrib.auth',

@@ -17,17 +17,19 @@ class Saves:
 
 
 class PC(models.Model):
-    playerName = models.CharField(max_length=200)
     name = models.CharField(max_length=200, primary_key=True)
     race = models.OneToOneField(SelectedRace, on_delete=models.CASCADE, blank=True, null=True)
     equipment = models.OneToOneField(Equipment, on_delete=models.CASCADE, blank=True)
     inventory = models.ForeignKey(Inventory, on_delete=models.CASCADE, blank=True)
-    abilities = models.OneToOneField(Abilities, on_delete=models.CASCADE)
-    photo = models.ImageField(blank=True, null=True)
+    abilities = models.ForeignKey(Abilities, on_delete=models.CASCADE)
+    photo = models.ImageField(upload_to="images/",blank=True, null=True)
     activeEffects = models.ManyToManyField(ActiveEffect, blank=True)
     alignment = models.ForeignKey(Alignment, on_delete=models.SET_NULL, null=True)
     gender = models.CharField(max_length=50, default="Male")
     classLevels = models.ManyToManyField(ClassLevel, blank=True)
+
+    def __str__(self):
+        return self.name
 
     # TODO: need to implement
     def maxWeight(self):
@@ -176,8 +178,8 @@ class PC(models.Model):
             ref = ref + classLevel.ref
             fort += classLevel.fort
             will += classLevel.will
-        acitveEffects = self.activeEffects.all()
-        for activeEffect in acitveEffects:
+        activeEffects = self.activeEffects.all()
+        for activeEffect in activeEffects:
             ref = activeEffect.effect.ref
             fort = activeEffect.effect.fort
             will = activeEffect.effect.will
@@ -190,3 +192,6 @@ class PC(models.Model):
 
 class PCSkillRank(SkillRank):
     pc = models.ForeignKey(PC, on_delete=models.CASCADE, related_name="skillRanks")
+
+    def __str__(self):
+        return self.pc.name + "'s " + self.skill.name

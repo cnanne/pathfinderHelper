@@ -3,7 +3,7 @@ from django.db import models
 
 class Skill(models.Model):
     name = models.CharField(max_length=100, primary_key=True)
-    subclass = models.CharField(max_length=100, default="", blank=True)
+    subclass = models.CharField(max_length=100, blank=True)
     acPenalty = models.BooleanField(default=False)
     untrained = models.BooleanField()
     ability = models.CharField(max_length=3)
@@ -15,6 +15,12 @@ class Skill(models.Model):
         self.untrained = untrained
         self.ability = ability
         self.description = description
+
+    def __str__(self):
+        name = self.name
+        if self.subclass is not None:
+            name += (" (" + self.subclass + ")")
+        return self.name
 
 
 class SkillRank(models.Model):
@@ -44,6 +50,9 @@ class Abilities(models.Model):
         self.intelligence += other.intelligence
         self.charisma += other.charisma
         return self
+
+    def __str__(self):
+        return self.name
 
 
 class AbilitiesMap():

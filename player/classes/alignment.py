@@ -16,3 +16,6 @@ class Alignment(models.Model):
     }
     name = models.CharField(max_length=100)
     alignment = models.CharField(max_length=2, choices=ALIGNMENTS)
+
+    def __str__(self):
+        return self.name
