@@ -27,6 +27,10 @@ class PC(models.Model):
     alignment = models.ForeignKey(Alignment, on_delete=models.SET_NULL, null=True)
     gender = models.CharField(max_length=50, default="Male")
     classLevels = models.ManyToManyField(ClassLevel, blank=True)
+    weight = models.IntegerField(blank=True, default=0, null=True)
+    age = models.IntegerField(blank=True, default=0, null=True)
+    hair = models.CharField(max_length=100, blank=True, default="Blonde", null=True)
+    eyes = models.CharField(max_length=100, blank=True, default="Green", null=True)
 
     def __str__(self):
         return self.name
