@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Character Creation Part 3</title>
+</head>
+<body>
+    <h1>Skills for {{ pc.name }}</h1>
+    <form action="/gm/createPlayer/3" method="POST">
+    {% for skill in skills %}
+
+        {% for classSkill in classSkills %}
+
+            {% if classSkill == skill.name %}
+
+                <label id="{{ skill.name }}">{{ skill.name }}*</label>
+
+            {% else %}
+
+                <label id="{{ skill.name }}">{{ skill.name }}</label>
+
+            {% endif %}
+            <input type="number" name="{{ skill.name }}" id="{{ skill.name }}">
+        {% endfor %}
+
+    {% endfor %}
+    <input type="submit">
+    </form>
+</body>
+</html>

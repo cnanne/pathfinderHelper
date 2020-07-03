@@ -5,6 +5,17 @@
     <title>Character Creation Step 2</title>
 </head>
 <body>
+    <h1>Add Class Level to {{ pc.name }}</h1>
+
+    {% for classLevel in levels %}
+        <form method="post" action="/gm/createPlayer/2">
+        {% csrf_token %}
+            <input type="hidden" value="{{ classLevel.name }}" id="level", name="level">
+            <label for="hp">Hit Points:</label>
+            <input type="number" min="0" max="{{ classLevel.gameClass.hp }}" id="hp" name="hp" required><br>
+            <button type="submit" >{{ classLevel.gameClass.name }}</button>
+        </form>
+    {% endfor %}
 
 </body>
 </html>

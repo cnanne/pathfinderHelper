@@ -26,7 +26,7 @@ class PC(models.Model):
     activeEffects = models.ManyToManyField(ActiveEffect, blank=True)
     alignment = models.ForeignKey(Alignment, on_delete=models.SET_NULL, null=True)
     gender = models.CharField(max_length=50, default="Male")
-    classLevels = models.ManyToManyField(ClassLevel, blank=True)
+    classLevels = models.ManyToManyField(PlayerClassLevel, blank=True)
     weight = models.IntegerField(blank=True, default=0, null=True)
     age = models.IntegerField(blank=True, default=0, null=True)
     hair = models.CharField(max_length=100, blank=True, default="Blonde", null=True)
@@ -64,9 +64,9 @@ class PC(models.Model):
         first = True
         level = ""
         for classLevel in classLevels.all():
-            level = level + classLevel.getLevel()
             if not first:
                 level = level + "-"
+            level = level + classLevel.getLevel()
             first = False
         return level
 
@@ -74,10 +74,10 @@ class PC(models.Model):
         classLevels = self.classLevels
         bab = [0, 0, 0, 0]
         for classLevel in classLevels.all():
-            bab[0] += classLevel.bab1
-            bab[1] += classLevel.bab2
-            bab[2] += classLevel.bab3
-            bab[3] += classLevel.bab4
+            bab[0] += classLevel.classLevel.bab1
+            bab[1] += classLevel.classLevel.bab2
+            bab[2] += classLevel.classLevel.bab3
+            bab[3] += classLevel.classLevel.bab4
         activeEffectsAttack = 0
         activeEffectsAttack += self.activeEffectsAttackBonus()
         bab[0] += activeEffectsAttack
@@ -192,6 +192,43 @@ class PC(models.Model):
         fort += self.race.race.fort
         saves = Saves({"ref": ref, "will": will, "fort": fort})
         return saves
+
+    def getAttacks(self):
+        bab = self.getBab()
+        rh = self.equipment.rightHand
+        lh = self.equipment.leftHand
+
+    def availableClassesForNewLevel(self):
+        levels = []
+        if self.classLevels.count() == 0:
+            classes = Class.objects.all()
+            for gameClass in classes:
+                classLevel: Class = gameClass
+                classLevel = classLevel.classlevel_set.first()
+                classLevel = classLevel.getLevel(1)
+                levels.append(classLevel)
+        else:
+            for classLevel in self.classLevels:
+                levels.append(classLevel.getNextLevel())
+            for gameClass in Class.objects.all():
+                for level in levels:
+                    if ClassLevel(level).gameClass.name == gameClass.name:
+                        continue
+                    classLevel = gameClass.objects.first()
+                    classLevel = classLevel.getLevel(1)
+                    levels.append(classLevel)
+        return levels
+
+    def getClassSkills(self):
+        classSkills = []
+        for playerClassLevel in self.classLevels:
+            for skill in playerClassLevel.classLevel.gameClass.classSkills.all():
+                if skill.name not in classSkills:
+                    classSkills.append(skill.name)
+        return classSkills
+
+    def addLevel(self, classLevel, hp):
+        pass
 
 
 class PCSkillRank(SkillRank):

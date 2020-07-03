@@ -11,6 +11,7 @@ class Language(models.Model):
 class Class(CommonInfo):
     shortHand = models.CharField(max_length=3)
     hitDie = models.CharField(max_length=6)
+    hp = models.IntegerField(default=0)
     alignment = models.ManyToManyField(Alignment)
     classSkills = models.ManyToManyField(Skill, blank=True)
     ranks = models.IntegerField()
@@ -20,6 +21,7 @@ class Class(CommonInfo):
 
 
 class ClassLevel(models.Model):
+    name = models.CharField(max_length=10, primary_key=True, blank=True)
     gameClass = models.ForeignKey(Class, on_delete=models.CASCADE)
     level = models.IntegerField()
     bab1 = models.IntegerField()
@@ -32,10 +34,45 @@ class ClassLevel(models.Model):
     specialAbilities = models.ManyToManyField(SpecialAbilities, blank=True)
 
     def __str__(self):
-        return self.gameClass.name + self.level
+        return self.gameClass.shortHand + str(self.level)
 
-    def getLevel(self):
-        return self.gameClass.shortHand + "/" + self.level.__str__()
+    def getLevel(self, level):
+        return ClassLevel.objects.get(name=self.gameClass.shortHand+str(level))
+
+    def getNextLevel(self):
+        return self.getLevel(self.level+1)
+
+    def getPrevLevel(self):
+        if self.level - 1 <= 0:
+            return self
+        return self.getLevel(self.level-1)
+
+    def save(self, *args, **kwargs):
+        self.name = self.gameClass.shortHand + str(self.level)
+        super().save(*args, **kwargs)
+
+
+class PlayerClassLevel(models.Model):
+    classLevel = models.ForeignKey(ClassLevel, on_delete=models.CASCADE, null=True)
+    hp = models.IntegerField()
+
+    def __str__(self):
+        return self.classLevel.gameClass.shortHand + self.classLevel.level
+
+    def getLevel(self, level):
+        return ClassLevel.objects.get(name=self.classLevel.gameClass.shortHand+level)
+
+    def getNextLevel(self):
+        return self.getLevel(self.classLevel.level+1)
+
+    def getPrevLevel(self):
+        if self.level - 1 <= 0:
+            return self.classLevel
+        return self.getLevel(self.classLevel.level-1)
+
+    def save(self, *args, **kwargs):
+        self.name = self.gameClass.shortHand + self.level
+        super().save(*args, **kwargs)
 
 # TODO: Need to add Language
 class Race(CommonInfo):

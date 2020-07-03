@@ -3,22 +3,57 @@
 {% load static %}
 
 <link rel="stylesheet" type="text/css" href="{% static 'player/style.css' %}">
+
+
+<!doctype html>
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>{{ pc.name }}</title>
-
-
-
-
+<meta charset="utf-8">
+<title>{{ pc.name }}</title>
 
 </head>
+
 <body>
- Nombre:  {{ pc.name }}<BR>
-    Genero/Raza:   {{ pc.gender }}/{{ pc.getRaceName }}<BR>
-    Alginment: {{ pc.getAlignment }}
-    Levels: {{ pc.getLevels }}
-    Size: {{ pc.getSize }}
-    AC: {{ pc.getAC }}
-    speed: {{ pc.getSpeed }}
+<p>&nbsp;</p>
+	<div style="text-align: center;">
+<h1>{{ pc.name }}</h1>
+		<h2>HP</h2>
+		</div>
+<p>&nbsp;</p>
+<table width="100%" border="1">
+  <tbody>
+    <tr>
+      <td width="50%"><table width="100%" class="basicStats">
+        <tbody>
+			<tr><td colspan="2" style="text-align: center;"><img src="{{ pc.photo.url }}"></td></tr>
+        	<tr><td>Nombre:</td><td> {{ pc.name }}</td></tr>
+			<tr><td>Genero/Raza:</td><td>{{ pc.gender }}/{{ pc.getRaceName }}</td></tr>
+			<tr><td>Alignment:</td><td> {{ pc.getAlignment }}</td></tr>
+	  		<tr><td>Levels:</td><td>{{ pc.getLevels }}</td></tr>
+			<tr><td>Size:</td><td>{{ pc.getSize }}</td></tr>
+			<tr><td>AC:</td><td>{{ pc.getAC }}</td></tr>
+			<tr><td>Speed:</td><td>{{ pc.getSpeed }}</td></tr>
+        </tbody>
+      </table></td>
+      <td><table width="50%" border="1">
+        <tbody>
+          <tr>
+            <td><a href="player/{{ pc.name }}/combat"><img src="player/images/boton1.png" width="350" height="193" alt=""/></a></td>
+              <td><a href="player/{{ pc.name }}/spells"><img src="player/images/boton2.png" width="350" height="193" alt=""/></a></td>
+          </tr>
+          <tr>
+              <td><a href="player/{{ pc.name }}/equipment"><img src="player/images/boton3.png" width="350" height="193" alt=""/></a></td>
+              <td><a href="player/{{ pc.name }}/inventory"><img src="player/images/boton4.png" width="350" height="193" alt=""/></a></td>
+          </tr>
+          <tr>
+              <td><a href="player/{{ pc.name }}/abilities"><img src="player/images/boton5.png" width="350" height="193" alt=""/></a></td>
+              <td><a href="player/{{ pc.name }}/skills"><img src="player/images/boton6.png" width="350" height="193" alt=""/></a></td>
+          </tr>
+        </tbody>
+      </table></td>
+    </tr>
+  </tbody>
+</table>
+<p>&nbsp;</p>
 </body>
 </html>

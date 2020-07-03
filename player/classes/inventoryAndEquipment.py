@@ -43,17 +43,17 @@ class InventoryItem(models.Model):
         return self.item.__str__() + " @ " + self.inventory.location.__str__()
 
 
-class Equipment(Inventory):
+class Equipment(models.Model):
     armor = models.ForeignKey(InventoryItem, on_delete=models.SET_NULL, blank=True, null=True, related_name='armors')
     leftHand = models.ForeignKey(InventoryItem, on_delete=models.SET_NULL, blank=True, null=True,
                                  related_name='leftHanded')
     rightHand = models.ForeignKey(InventoryItem, on_delete=models.SET_NULL, blank=True, null=True,
                                   related_name='righthanded')
     primaryHand = models.CharField(max_length=1, default="R")
-    eyes = models.ForeignKey(InventoryItem, on_delete=models.SET_NULL, null=True, related_name="eyes")
-    legs = models.ForeignKey(InventoryItem, on_delete=models.SET_NULL, null=True, related_name="legs")
-    neck = models.ForeignKey(InventoryItem, on_delete=models.SET_NULL, null=True, related_name="neck")
-    feet = models.ForeignKey(InventoryItem, on_delete=models.SET_NULL, null=True, related_name="feet")
+    eyes = models.ForeignKey(InventoryItem, on_delete=models.SET_NULL, blank=True, null=True, related_name="eyes")
+    legs = models.ForeignKey(InventoryItem, on_delete=models.SET_NULL, blank=True, null=True, related_name="legs")
+    neck = models.ForeignKey(InventoryItem, on_delete=models.SET_NULL, blank=True, null=True, related_name="neck")
+    feet = models.ForeignKey(InventoryItem, on_delete=models.SET_NULL, blank=True, null=True, related_name="feet")
 
     def __str__(self):
         return self.pc.name + '\'s equipment'
