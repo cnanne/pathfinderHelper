@@ -42,6 +42,18 @@ class InventoryItem(models.Model):
     def __str__(self):
         return self.item.__str__() + " @ " + self.inventory.location.__str__()
 
+    def canBeWielded(self):
+        return self.item.canBeWielded()
+
+    def canBeWorn(self):
+        return self.item.canBeWorn()
+
+    def canBeEquipped(self):
+        return self.item.canBeEquipped()
+
+    def isShield(self):
+        return self.item.isShield()
+
 
 class Equipment(models.Model):
     armor = models.ForeignKey(InventoryItem, on_delete=models.SET_NULL, blank=True, null=True, related_name='armors')
@@ -54,6 +66,25 @@ class Equipment(models.Model):
     legs = models.ForeignKey(InventoryItem, on_delete=models.SET_NULL, blank=True, null=True, related_name="legs")
     neck = models.ForeignKey(InventoryItem, on_delete=models.SET_NULL, blank=True, null=True, related_name="neck")
     feet = models.ForeignKey(InventoryItem, on_delete=models.SET_NULL, blank=True, null=True, related_name="feet")
+
+    def getArmorAC(self):
+        if self.armor is None:
+            return 0
+        else:
+            return self.armor.ac
+
+    def getShieldAC(self):
+        ac = 0
+        if self.leftHand is not None and self.leftHand.isShield():
+            ac += self.leftHand.item.ac
+        if self.rightHand is not None and self.rightHand.isShield():
+            ac += self.rightHand.item.ac
+        return ac
+
+    def AC(self):
+        ac = self.getArmorAC()
+        ac += self.getShieldAC()
+        return ac
 
     def __str__(self):
         return self.pc.name + '\'s equipment'

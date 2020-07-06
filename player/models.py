@@ -22,15 +22,63 @@ class PC(models.Model):
     equipment = models.OneToOneField(Equipment, on_delete=models.CASCADE, blank=True)
     inventory = models.ForeignKey(Inventory, on_delete=models.CASCADE, blank=True)
     abilities = models.ForeignKey(Abilities, on_delete=models.CASCADE)
-    photo = models.ImageField(upload_to="images/",blank=True, null=True)
+    photo = models.ImageField(upload_to="images", blank=True, null=True)
     activeEffects = models.ManyToManyField(ActiveEffect, blank=True)
     alignment = models.ForeignKey(Alignment, on_delete=models.SET_NULL, null=True)
     gender = models.CharField(max_length=50, default="Male")
-    classLevels = models.ManyToManyField(PlayerClassLevel, blank=True)
     weight = models.IntegerField(blank=True, default=0, null=True)
     age = models.IntegerField(blank=True, default=0, null=True)
     hair = models.CharField(max_length=100, blank=True, default="Blonde", null=True)
     eyes = models.CharField(max_length=100, blank=True, default="Green", null=True)
+
+    def getAC(self):
+        ac = 10
+        ac += self.equipment.AC()
+        for activeEffect in self.activeEffects.all():
+            ac += activeEffect.effect.ac
+        abilities = self.getAbilitiesScoresAndModifiers
+        ac += abilities["DEX"]["mod"]
+        return ac
+
+    def firstSave(self):
+        location = Location()
+        location.name = self.name
+        location.save()
+        inv = Inventory()
+        inv.location = location
+        inv.save()
+        self.inventory = inv
+
+
+        equipment = Equipment()
+        equipment.save()
+        self.equipment = equipment
+        self.save()
+
+    def save(self, *args, **kwargs):
+
+        self.abilities.save()
+        self.abilities = self.abilities
+        self.race.save()
+        self.race = self.race
+
+        super().save(*args, **kwargs)
+
+    def getLevels(self):
+        playerClassLevels = self.playerclasslevel_set.all()
+        playerClasses = []
+        finalClassLevels = {}
+        levels = ""
+        for playerClassLevel in playerClassLevels:
+            if playerClassLevel.classLevel.gameClass not in playerClasses:
+                playerClasses.append(playerClassLevel.classLevel.gameClass)
+                finalClassLevels[playerClassLevel.classLevel.gameClass.name] = playerClassLevel
+            else:
+                if playerClassLevel > finalClassLevels[playerClassLevel.playerClassLevel.classLevel.gameClass.name]:
+                    finalClassLevels[playerClassLevel.classLevel.gameClass.name] = playerClassLevel
+        for playerClassLevel in finalClassLevels.values():
+            levels += playerClassLevel.classLevel.name
+        return levels
 
     def __str__(self):
         return self.name
@@ -58,17 +106,6 @@ class PC(models.Model):
 
     def getAlignment(self):
         return self.alignment.alignment
-
-    def getLevels(self):
-        classLevels = self.classLevels
-        first = True
-        level = ""
-        for classLevel in classLevels.all():
-            if not first:
-                level = level + "-"
-            level = level + classLevel.getLevel()
-            first = False
-        return level
 
     def getBab(self):
         classLevels = self.classLevels
@@ -136,32 +173,17 @@ class PC(models.Model):
         return self.getAbilitiesSocresAndModifiers
 
     @property
-    def getAbilitiesSocresAndModifiers(self):
+    def getAbilitiesScoresAndModifiers(self):
         abilities = self.getAbilities()
-        return {"STR": self.makeAbilitydictionary(abilities.strength),
-                "DEX": self.makeAbilitydictionary(abilities.dexterity),
-                "CON": self.makeAbilitydictionary(abilities.constitution),
-                "WIS": self.makeAbilitydictionary(abilities.wisdom),
-                "INT": self.makeAbilitydictionary(abilities.intelligence),
-                "CHA": self.makeAbilitydictionary(abilities.charisma)}
-
-    def makeAbilitydictionary(self, abilityScore):
-        return {"score": abilityScore, "mod": self.calculateModifier(abilityScore)}
+        return abilities.makeDictionary()
 
     def getAbilities(self):
         abilities = Abilities()
         abilities += self.abilities
+        abilities += self.race.appliedAbilities
         for effect in self.activeEffects.all():
             abilities += effect.abilities
         return abilities
-
-    def calculateModifier(self, ability):
-        mod = 0
-        if ability >= 10:
-            mod = int((ability - 10) / 2)
-        else:
-            mod = int((ability - 10) / 2) - 1
-        return mod
 
     def getClassSkills(self):
         classLevels = self.classLevels
@@ -200,7 +222,7 @@ class PC(models.Model):
 
     def availableClassesForNewLevel(self):
         levels = []
-        if self.classLevels.count() == 0:
+        if self.playerclasslevel_set.count() == 0:
             classes = Class.objects.all()
             for gameClass in classes:
                 classLevel: Class = gameClass
@@ -208,7 +230,7 @@ class PC(models.Model):
                 classLevel = classLevel.getLevel(1)
                 levels.append(classLevel)
         else:
-            for classLevel in self.classLevels:
+            for classLevel in self.playerclasslevel_set.all():
                 levels.append(classLevel.getNextLevel())
             for gameClass in Class.objects.all():
                 for level in levels:
@@ -221,18 +243,100 @@ class PC(models.Model):
 
     def getClassSkills(self):
         classSkills = []
-        for playerClassLevel in self.classLevels:
+        for playerClassLevel in self.classLevels.all():
             for skill in playerClassLevel.classLevel.gameClass.classSkills.all():
                 if skill.name not in classSkills:
                     classSkills.append(skill.name)
         return classSkills
 
     def addLevel(self, classLevel, hp):
-        pass
+        playerClassLevel = PlayerClassLevel()
+        playerClassLevel.pc = self
+        playerClassLevel.classLevel = classLevel
+        playerClassLevel.hp = hp
+        playerClassLevel.save()
 
+    def addSkillRanks(self, skills):
+        skillRanks = []
+        for skill in skills:
+            skill: str
+            if skill.endswith('*'):
+                skill = skill[0:len(skill) - 1]
+            skillFound = False
+            for pcSkillRank in self.skillRanks.all():
+                if pcSkillRank.skill.name == skill:
+                    pcSkillRank.addRank()
+                    skillFound = True
+            if not skillFound:
+                pcSkillRank = PCSkillRank()
+                pcSkillRank.pc = self
+                try:
+                    skillObj = Skill.objects.get(pk=skill)
+                except:
+                    continue
+                pcSkillRank.skill = skillObj
+                pcSkillRank.ranks = 1
+                skillRanks.append(pcSkillRank)
+        return skillRanks
 
 class PCSkillRank(SkillRank):
     pc = models.ForeignKey(PC, on_delete=models.CASCADE, related_name="skillRanks")
 
     def __str__(self):
         return self.pc.name + "'s " + self.skill.name
+
+    @property
+    def totalRanks(self):
+        abilities = self.pc.abilities
+        self.skill.ability
+
+
+class PlayerClassLevel(models.Model):
+    classLevel = models.ForeignKey(ClassLevel, on_delete=models.CASCADE, null=True)
+    hp = models.IntegerField()
+    pc = models.ForeignKey(PC, on_delete=models.CASCADE, null=True)
+
+    def __str__(self):
+        return self.pc.name + ":" + self.classLevel.gameClass.shortHand + str(self.level)
+
+    def __gt__(self, other):
+        if self.sameClassLevel(other):
+            if self.classLevel.level > other.classLevel.level:
+                return True
+        return False
+
+    def sameClassLevel(self, playerClassLevel):
+        if self.classLevel is playerClassLevel.classLevel:
+            return True
+        else:
+            return False
+
+    def getLevel(self, level):
+        try:
+            return ClassLevel.objects.get(name=self.classLevel.gameClass.shortHand + str(level))
+        except:
+            return None
+
+    def getNextLevel(self):
+        nextLevel = self.getLevel(self.classLevel.level + 1)
+        if nextLevel is None:
+            return self.classLevel
+        return nextLevel
+
+    def getPrevLevel(self):
+        if self.level - 1 <= 0:
+            return self.classLevel
+        return self.getLevel(self.classLevel.level - 1)
+
+    def save(self, *args, **kwargs):
+        name = self.pc.name
+        name += ":"
+        name += self.classLevel.gameClass.shortHand
+        name += str(self.classLevel.level)
+        level = self.level
+        self.name = name
+        super().save(*args, **kwargs)
+
+    @property
+    def level(self):
+        return self.classLevel.level

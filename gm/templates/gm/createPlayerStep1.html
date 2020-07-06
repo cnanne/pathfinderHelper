@@ -5,7 +5,7 @@
     <title>Player Creation</title>
 </head>
 <body>
-    <form action="/gm/createPlayer/1" method="post">
+    <form action="/gm/createPlayer/1" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form.as_p }}
         <input type="submit" value="Submit">

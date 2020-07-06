@@ -31,6 +31,9 @@ class Item(CommonInfo):
     def canBeEquipped(self):
         return False
 
+    def isShield(self):
+        return False
+
 
 class WearableItem(Item):
     AREAS = {
@@ -126,6 +129,9 @@ class Shield(Armor):
         ("1H", "One Handed")
     }
     hands = models.CharField(max_length=2, choices=WIELDING)
+
+    def isShield(self):
+        return True
 
     def canBeWielded(self):
         return True

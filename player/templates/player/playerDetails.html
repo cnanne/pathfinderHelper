@@ -25,7 +25,7 @@
     <tr>
       <td width="50%"><table width="100%" class="basicStats">
         <tbody>
-			<tr><td colspan="2" style="text-align: center;"><img src="{{ pc.photo.url }}"></td></tr>
+			<tr><td colspan="2" style="text-align: center;"><img src="{{ pc.photo.url }}" width="150"></td></tr>
         	<tr><td>Nombre:</td><td> {{ pc.name }}</td></tr>
 			<tr><td>Genero/Raza:</td><td>{{ pc.gender }}/{{ pc.getRaceName }}</td></tr>
 			<tr><td>Alignment:</td><td> {{ pc.getAlignment }}</td></tr>
@@ -38,16 +38,16 @@
       <td><table width="50%" border="1">
         <tbody>
           <tr>
-            <td><a href="player/{{ pc.name }}/combat"><img src="player/images/boton1.png" width="350" height="193" alt=""/></a></td>
-              <td><a href="player/{{ pc.name }}/spells"><img src="player/images/boton2.png" width="350" height="193" alt=""/></a></td>
+            <td><a href="{{ pc.name }}/combat"><img src="{% static 'player/images/boton1.png' %}" width="350" height="193" alt=""/></a></td>
+              <td><a href="player/{{ pc.name }}/spells"><img src="{% static 'player/images/boton2.png' %}" width="350" height="193" alt=""/></a></td>
           </tr>
           <tr>
-              <td><a href="player/{{ pc.name }}/equipment"><img src="player/images/boton3.png" width="350" height="193" alt=""/></a></td>
-              <td><a href="player/{{ pc.name }}/inventory"><img src="player/images/boton4.png" width="350" height="193" alt=""/></a></td>
+              <td><a href="player/{{ pc.name }}/equipment"><img src="{% static 'player/images/boton3.png' %}" width="350" height="193" alt=""/></a></td>
+              <td><a href="player/{{ pc.name }}/inventory"><img src="{% static 'player/images/boton4.png' %}" width="350" height="193" alt=""/></a></td>
           </tr>
           <tr>
-              <td><a href="player/{{ pc.name }}/abilities"><img src="player/images/boton5.png" width="350" height="193" alt=""/></a></td>
-              <td><a href="player/{{ pc.name }}/skills"><img src="player/images/boton6.png" width="350" height="193" alt=""/></a></td>
+              <td><a href="player/{{ pc.name }}/abilities"><img src="{% static 'player/images/boton5.png' %}" width="350" height="193" alt=""/></a></td>
+              <td><a href="player/{{ pc.name }}/skills"><img src="{% static 'player/images/boton6.png' %}" width="350" height="193" alt=""/></a></td>
           </tr>
         </tbody>
       </table></td>

@@ -32,6 +32,13 @@ class SkillRank(models.Model):
         skillRank = cls(skill=skill, ranks=ranks)
         return skillRank
 
+    def addRank(self):
+        self.ranks += 1
+
+    @property
+    def totalRanks(self):
+        return self.ranks
+
 
 class Abilities(models.Model):
     name = models.CharField(max_length=100, primary_key=True)
@@ -54,8 +61,31 @@ class Abilities(models.Model):
     def __str__(self):
         return self.name
 
+    @staticmethod
+    def makeAbilityDictionary(abilityScore):
+        return {"score": abilityScore, "mod": Abilities.calculateModifier(abilityScore)}
 
-class AbilitiesMap():
+    @staticmethod
+    def calculateModifier(ability):
+        mod = 0
+        if ability >= 10:
+            mod = int((ability - 10) / 2)
+        else:
+            mod = int((ability - 10) / 2) - 1
+        return mod
+
+    def makeDictionary(self):
+        abilities = {"STR": self.makeAbilityDictionary(self.strength),
+                     "DEX": self.makeAbilityDictionary(self.dexterity),
+                     "CON": self.makeAbilityDictionary(self.constitution),
+                     "WIS": self.makeAbilityDictionary(self.wisdom),
+                     "INT": self.makeAbilityDictionary(self.intelligence),
+                     "CHA": self.makeAbilityDictionary(self.charisma)}
+        return abilities
+
+
+
+class AbilitiesMap:
     str = dex = con = wis = int = cha = 10
     strMod = dexMod = conMod = wisMod = intMod = chaMod = 0
 

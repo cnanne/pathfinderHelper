@@ -6,3 +6,7 @@ html {
   -o-background-size: cover;
   background-size: cover;
 }
+
+.basicStats {
+  font-size: 2vw;
+}

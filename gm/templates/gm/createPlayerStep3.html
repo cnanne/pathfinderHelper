@@ -6,25 +6,34 @@
 </head>
 <body>
     <h1>Skills for {{ pc.name }}</h1>
-    <form action="/gm/createPlayer/3" method="POST">
+    <form action="/gm/createPlayer/3" method="POST" onsubmit="return validate()" required>
+    {% csrf_token %}
+    Skills with * are Class Skills<br>
+    <br>
+    <select name="skills" id="skills" multiple size={{ skills.count }}>
     {% for skill in skills %}
-
-        {% for classSkill in classSkills %}
-
-            {% if classSkill == skill.name %}
-
-                <label id="{{ skill.name }}">{{ skill.name }}*</label>
-
-            {% else %}
-
-                <label id="{{ skill.name }}">{{ skill.name }}</label>
-
-            {% endif %}
-            <input type="number" name="{{ skill.name }}" id="{{ skill.name }}">
-        {% endfor %}
-
+        <option value="{{ skill }}">{{ skill }}</option>
     {% endfor %}
-    <input type="submit">
+    </select>
+    <input type="submit" name="Submit">
     </form>
+<script>
+        function validate()
+        {
+            var selectChoose = document.getElementById('skills');
+            var maxOptions = {{ maxRanks }};
+            var optionCount = 0;
+            for (var i = 0; i < selectChoose.length; i++) {
+                if (selectChoose[i].selected) {
+                    optionCount++;
+                }
+            }
+            if (optionCount != maxOptions) {
+                        alert("Too many ranks assigned or missing")
+                        return false;
+                    }
+            return true;
+        }
+</script>
 </body>
 </html>

@@ -4,6 +4,7 @@ from player.classes.alignment import *
 from player.classes.specialAbilities import *
 
 
+
 class Language(models.Model):
     name = models.CharField(max_length=100)
 
@@ -51,28 +52,6 @@ class ClassLevel(models.Model):
         self.name = self.gameClass.shortHand + str(self.level)
         super().save(*args, **kwargs)
 
-
-class PlayerClassLevel(models.Model):
-    classLevel = models.ForeignKey(ClassLevel, on_delete=models.CASCADE, null=True)
-    hp = models.IntegerField()
-
-    def __str__(self):
-        return self.classLevel.gameClass.shortHand + self.classLevel.level
-
-    def getLevel(self, level):
-        return ClassLevel.objects.get(name=self.classLevel.gameClass.shortHand+level)
-
-    def getNextLevel(self):
-        return self.getLevel(self.classLevel.level+1)
-
-    def getPrevLevel(self):
-        if self.level - 1 <= 0:
-            return self.classLevel
-        return self.getLevel(self.classLevel.level-1)
-
-    def save(self, *args, **kwargs):
-        self.name = self.gameClass.shortHand + self.level
-        super().save(*args, **kwargs)
 
 # TODO: Need to add Language
 class Race(CommonInfo):

@@ -12,6 +12,7 @@ class Effect(models.Model):
     fort = models.IntegerField(default=0)
     will = models.IntegerField(default=0)
     ref = models.IntegerField(default=0)
+    ac = models.IntegerField(default=0)
 
     def __str__(self):
         return self.name
