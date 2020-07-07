@@ -2,6 +2,7 @@ from django.db import models
 from player.classes.items import *
 from player.classes.alignment import *
 from player.classes.specialAbilities import *
+from player.classes.commonInfo import CommonInfo
 
 
 
@@ -16,6 +17,10 @@ class Class(CommonInfo):
     alignment = models.ManyToManyField(Alignment)
     classSkills = models.ManyToManyField(Skill, blank=True)
     ranks = models.IntegerField()
+    hasDomains = models.BooleanField(default=False)
+    hasBloodlines = models.BooleanField(default=False)
+    hasSchools = models.BooleanField(default=False)
+
 
     def __str__(self):
         return self.name
